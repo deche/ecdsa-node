@@ -1,9 +1,10 @@
 import { useState } from "react";
 import server from "./server";
 
-function Transfer({ address, setBalance }) {
+function Transfer({ address, setBalance, setNonce }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
+  const [signature, setSignature] = useState("");
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
 
@@ -12,13 +13,15 @@ function Transfer({ address, setBalance }) {
 
     try {
       const {
-        data: { balance },
+        data: { balance, nonce },
       } = await server.post(`send`, {
         sender: address,
         amount: parseInt(sendAmount),
         recipient,
+        signature
       });
       setBalance(balance);
+      setNonce(nonce);
     } catch (ex) {
       alert(ex.response.data.message);
     }
@@ -45,6 +48,15 @@ function Transfer({ address, setBalance }) {
           onChange={setValue(setRecipient)}
         ></input>
       </label>
+
+      <label>
+        Signature
+        <input
+          placeholder="Signature in compact hex format"
+          value={signature}
+          onChange={setValue(setSignature)}
+        ></input>
+      </label>      
 
       <input type="submit" className="button" value="Transfer" />
     </form>
